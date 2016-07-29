@@ -239,7 +239,7 @@ static ssize_t board_read(struct file *filp, char *buf, size_t count, loff_t *f_
 		{
 			//tbuf[i] = 0x23;
 			get_random_bytes(&rand, sizeof(rand)); //init the bytes randomly
-			tbuf[i] = rand;
+			//tbuf[i] = rand;
 		}
 		tbuf[32]= 0xC0; //init the last byte
 		//printk(KERN_EMERG "\nchannel 2 value = %d", channel[2]);
@@ -305,7 +305,7 @@ static ssize_t board_read(struct file *filp, char *buf, size_t count, loff_t *f_
 	}
 	else if(command == 'v')
 	{
-		sprintf(tbuf,"\nBoard has been reset"); 
+		sprintf(tbuf,"\nOpenBCI V3 8-16 channel\n$$$"); 
 		//handle reset
 	}
 	else if (command == 's')
