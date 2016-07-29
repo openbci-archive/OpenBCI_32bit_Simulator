@@ -34,6 +34,7 @@ static int board_init(void);
 static void timer_handler(unsigned long data);
 
 volatile int packetno=0; //to count no. of packets
+volatile int channel[9];
 
 /* Structure that declares the usual file */
 /* access functions */
@@ -144,18 +145,71 @@ static ssize_t board_write(struct file *filp, const char *buf, size_t count, lof
 	{
 		return -EFAULT;
 	}
+	printk(KERN_EMERG "\nboard_buffer[0] = %c", board_buffer[0]);
     
     /*see what that character is and set the command*/
-    if(board_buffer[0]== 'b')
-    	command = 'b'; //stream
-    else if(board_buffer[0] == 'v')
-    	command = 'v'; //reset
-    else if (board_buffer[0]=='s')
+     switch (board_buffer[0])
     {
-    	command = 's'; //stop
+    	case 'b':
+	    	command = 'b'; //stream
+	    	break;
+    	case 'v':
+	    	command = 'v'; //reset
+	    	break;
+    	case 's':
+	    	command = 's'; //stop
+	    	break;
+	    case '1':
+	    	channel[1] = -1;
+	    	break;
+	    case '2':
+	    	channel[2] = -1;
+	    	break;
+	    case '3':
+	    	channel[3] = -1;
+	    	break;
+	    case '4':
+	    	channel[4] = -1;
+	    	break;
+	    case '5':
+	    	channel[5] = -1;
+	    	break;
+	    case '6':
+	    	channel[6] = -1;
+	    	break;
+	    case '7':
+	    	channel[7] = -1;
+	    	break;
+	    case '8':
+	    	channel[8] = -1;
+	    	break;
+	    case '!':
+	    	channel[1] = 2;
+	    	break;
+	    case '@':
+	    	channel[2] = 2;
+	    	break;
+	    case '#':
+	    	channel[3] = 2;
+	    	break;
+	    case '$':
+	    	channel[4] = 2;
+	    	break;
+	    case '%':
+	    	channel[5] = 2;
+	    	break;
+	    case '^':
+	    	channel[6] = 2;
+	    	break;
+	    case '&':
+	    	channel[7] = 2;
+	    	break;
+	    case '*':
+	    	channel[8] = 2;
+	    	break;
+    	default:
+    		command = 'u'; //
     }
-    else
-    	command = 'u'; //unknown
 
     return count;
 }
@@ -166,7 +220,7 @@ static ssize_t board_read(struct file *filp, char *buf, size_t count, loff_t *f_
 	char tbuf[33]; //the 33 byte packet that the board will send
 	char rand; //random byte
 	int i; //counter variable
-	printk(KERN_EMERG "\nIn board_read, command = %c", command); //just for debugging
+	//printk(KERN_EMERG "\nIn board_read, command = %c", command); //just for debugging
 	
 	if(command == 'b')
 	{
@@ -179,7 +233,7 @@ static ssize_t board_read(struct file *filp, char *buf, size_t count, loff_t *f_
 		accelArray[1] = (randomnum(time(NULL)+2) * 0.1 * (randomnum(time(NULL)+3) > 0.5 ? -1 : 1)); //y
 		accelArray[2] = (randomnum(time(NULL)) * 0.4 * (randomnum(time(NULL)) > 0.5 ? -1 : 1)); //z */
 	
-		printk(KERN_EMERG "\nIn kernel, starting stream, packet %d", packetno); 
+		//printk(KERN_EMERG "\nIn kernel, starting stream, packet %d", packetno); 
 		tbuf[0] = 0xA0; //init the 1st byte
 		for(i=1; i<32; i++)
 		{
@@ -188,6 +242,66 @@ static ssize_t board_read(struct file *filp, char *buf, size_t count, loff_t *f_
 			tbuf[i] = rand;
 		}
 		tbuf[32]= 0xC0; //init the last byte
+		//printk(KERN_EMERG "\nchannel 2 value = %d", channel[2]);
+		/*turn off channels here
+		setting to 56 instead of 0 because of some bug*/
+		if(channel[1] == -1)
+			{
+				printk(KERN_EMERG "\nChannel 1 is OFF");
+				tbuf[2] = 0x56;
+				tbuf[3] = 0x56;
+				tbuf[4] = 0x56;
+			}
+		if(channel[2] == -1)
+			{
+				printk(KERN_EMERG "\nChannel 2 is OFF");
+				tbuf[5] = 0x56;
+				tbuf[6] = 0x56;
+				tbuf[7] = 0x56;
+			}
+		if(channel[3] == -1)
+			{
+				printk(KERN_EMERG "\nChannel 3 is OFF");
+				tbuf[8] = 0x56;
+				tbuf[9] = 0x56;
+				tbuf[10] = 0x56;
+			}
+		if(channel[4] == -1)
+			{
+				printk(KERN_EMERG "\nChannel 4 is OFF");
+				tbuf[11] = 0x56;
+				tbuf[12] = 0x56;
+				tbuf[13] = 0x56;
+			}
+		if(channel[5] == -1)
+			{
+				printk(KERN_EMERG "\nChannel 5 is OFF");
+				tbuf[14] = 0x56;
+				tbuf[15] = 0x56;
+				tbuf[16] = 0x56;
+			}
+		if(channel[6] == -1)
+			{
+				printk(KERN_EMERG "\nChannel 6 is OFF");
+				tbuf[17] = 0x56;
+				tbuf[18] = 0x56;
+				tbuf[19] = 0x56;
+			}
+		if(channel[7] == -1)
+			{
+				printk(KERN_EMERG "\nChannel 7 is OFF");
+				tbuf[20] = 0x56;
+				tbuf[21] = 0x56;
+				tbuf[22] = 0x56;
+			}
+		if(channel[8] == -1)
+			{
+				printk(KERN_EMERG "\nChannel 8 is OFF");
+				tbuf[23] = 0x56;
+				tbuf[24] = 0x56;
+				tbuf[25] = 0x56;
+			}
+
 	}
 	else if(command == 'v')
 	{
