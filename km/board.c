@@ -239,7 +239,7 @@ static ssize_t board_read(struct file *filp, char *buf, size_t count, loff_t *f_
 		{
 			//tbuf[i] = 0x23;
 			get_random_bytes(&rand, sizeof(rand)); //init the bytes randomly
-			//tbuf[i] = rand;
+			tbuf[i] = rand;
 		}
 		tbuf[32]= 0xC0; //init the last byte
 		//printk(KERN_EMERG "\nchannel 2 value = %d", channel[2]);
@@ -302,10 +302,17 @@ static ssize_t board_read(struct file *filp, char *buf, size_t count, loff_t *f_
 				tbuf[25] = 0x56;
 			}
 
+		for(i=0; i<33; i++)
+		{
+			printk(KERN_EMERG "\nBYTE = %x",tbuf[i]);
+		}
+
+
 	}
 	else if(command == 'v')
 	{
-		sprintf(tbuf,"\nOpenBCI V3 8-16 channel\n$$$"); 
+		//sprintf(bigbuff, "OpenBCI V3 8-16 channel\nDS1299 Device ID: 0x3E\nLIS3DH Device ID: 0x33\nFirmware: v2.0.0\n$$$");
+		sprintf(tbuf,"\nOpenBCI-RESETINFO\nDEVID\n$$$"); 
 		//handle reset
 	}
 	else if (command == 's')
