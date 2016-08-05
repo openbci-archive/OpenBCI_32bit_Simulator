@@ -68,9 +68,8 @@ int main(int argc, char **argv)
 	send_to_board("v"); //reset board
 	printf("\nSent v to board");
 	sleep(1);
-	send_to_board("2"); //turn 2 and 4 off
-	send_to_board("4");
-	//printf("\nSend to board b return: %d", send_to_board("b")); //start sequence
+	send_to_board("2"); //turn off channel 2 and 5
+	send_to_board("5"); 
 	send_to_board("b");
 	printf("\nSent b to board");	
 
@@ -83,16 +82,14 @@ int main(int argc, char **argv)
 		strcpy(response,"");
 		
 		printf("\nIteration %d", i);
-		//printf("\nByte 1 = %02X, byte l = %02X",response[0], response[32]);
 		read(wFile,response,33);
-		//printf("%s\n",response);		
+		//printf("%s\n",response);	
+		/*for (int i = 0; i < 33; ++i)
+		{
+			printf("BYTE %x\n",response[i]);	
+		}*/
 		byte_parser(response, 33);
-		//x = interpret16bitAsInt32(response[26], response[27]);
-		//y = interpret16bitAsInt32(response[28], response[29]);
-		//z = interpret16bitAsInt32(response[30], response[31]);
-		//x = response[27] | response[26] <<8;
-		//y = response[29] | response[28] <<8;
-		//z = response[31] | response[30] <<8;
+		send_to_board("d"); //set to default for next iteration. 
 
 	}
 	send_to_board("s"); //stop transmission
@@ -125,12 +122,15 @@ int open_port()
 
 int open_fake_port()
 {
+	printf("\nOpening Fake Port");
 	wFile = open("/dev/board", O_RDWR);
 	if(wFile < 0)
 	{
 		printf( "\nFailed to open fake port, make sure the module is inserted and running (lsmod)" );
 		return -1;
 	}
+
+return 0;
 }
 
 int send_to_board(char* message){

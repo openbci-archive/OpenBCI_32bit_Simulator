@@ -71,7 +71,7 @@ char command = 's'; //command that is sent to boards
 /* the init function is called once, when the module is inserted */
 static int board_init(void) 
 {
-	int result, ret;
+	int result, ret; 
 	/* Registering device */
 	result = register_chrdev(board_major, "board", &board_fops);
 	if (result < 0)
@@ -89,13 +89,14 @@ static int board_init(void)
 		goto fail; 
 	} 
 
-	memset(board_buffer, 0, capacity); //init buffer to
+	memset(board_buffer, 0, capacity); //init buffer to zero
 	board_len = 0;
 	printk(KERN_EMERG "Inserting board module\n"); 
 
 	//set up timers, not currently used
 	setup_timer(&the_timer[0], timer_handler, 0);
 	ret = mod_timer(&the_timer[0], jiffies + msecs_to_jiffies(timePer/2));
+
 
 	return 0;
 	fail: 
@@ -140,7 +141,7 @@ static int board_release(struct inode *inode, struct file *filp)
 /*whenever someone writes to the board, this is called */
 static ssize_t board_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos)
 {
-	
+	int i;
 	if (copy_from_user(board_buffer, buf, 1)) //copy 1 character from the user
 	{
 		return -EFAULT;
@@ -207,6 +208,11 @@ static ssize_t board_write(struct file *filp, const char *buf, size_t count, lof
 	    case '*':
 	    	channel[8] = 2;
 	    	break;
+	    case 'd':
+	    	 for(i=0; i<9; i++) channel[i] = 2;
+	    	 break;
+	    case 'D':
+	    	 command = 'D';
     	default:
     		command = 'u'; //
     }
@@ -320,6 +326,11 @@ static ssize_t board_read(struct file *filp, char *buf, size_t count, loff_t *f_
 		sprintf(tbuf,"\n Streaming stopped");
 		//handle stop
 	}
+	else if (command == 'D')
+	{
+		//send defualt settings info
+		sprintf(tbuf, "123456$$$"); //send 6 ASCII characters followed by some dough!
+	}
 	else
 	{
 		sprintf(tbuf, "\nUnknown command");
@@ -334,7 +345,7 @@ static ssize_t board_read(struct file *filp, char *buf, size_t count, loff_t *f_
 
 	if (copy_to_user(buf,board_buffer, sizeof(tbuf))) //copy the buffer to user space
 	{
-		printk(KERN_ALERT "Couldn't copy to user\n"); 
+		printk(KERN_EMERG "Couldn't copy to user\n"); 
 		return -EFAULT;	
 	}
 	
